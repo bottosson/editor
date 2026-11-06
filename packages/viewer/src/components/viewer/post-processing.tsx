@@ -62,6 +62,7 @@ import { isLiveFrameHeld } from '../../lib/live-frame-hold'
 import { mergedOutline } from '../../lib/merged-outline-node'
 import { recordPerfSample, timeSpan } from '../../lib/perf-tracks'
 import { PostProcessingResources } from '../../lib/post-processing-resources'
+import { renderWithSceneMatrices } from '../../lib/scene-matrices'
 import { sceneLightingMask, scenePassMrt } from '../../lib/scene-pass-mrt'
 import { packNormalToRGB, unpackRGBToNormal } from '../../lib/tsl-compat'
 import {
@@ -975,7 +976,7 @@ const PostProcessingPasses = ({
         }
         const submittedAt = PERF_OVERLAY_ENABLED ? performance.now() : 0
         timeSpan('render-encode', () => {
-          ;(renderer as any).render(scene, camera)
+          renderWithSceneMatrices(scene, () => (renderer as any).render(scene, camera))
         })
         if (PERF_OVERLAY_ENABLED) recordFrameGpuTiming(renderer, submittedAt)
       } catch (fallbackError) {
@@ -994,7 +995,7 @@ const PostProcessingPasses = ({
       ;(renderer as any).setClearAlpha(0)
       const submittedAt = PERF_OVERLAY_ENABLED ? performance.now() : 0
       timeSpan('render-encode', () => {
-        pipeline.render()
+        renderWithSceneMatrices(scene, () => pipeline.render())
       })
       if (PERF_OVERLAY_ENABLED) recordFrameGpuTiming(renderer, submittedAt)
     } catch (error) {
